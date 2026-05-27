@@ -124,6 +124,53 @@ npm run preview
 - 从 JSON 文件导入数据
 - 清空全部数据
 
+## Git版本控制
+
+本项目采用Git进行版本控制，提交记录遵循规范格式：
+
+```bash
+<类型>: <简要说明本次提交内容>
+```
+
+### 提交类型说明
+- `init`: 项目初始化操作
+- `feat`: 新增功能开发
+- `fix`: 缺陷修复
+- `style`: 样式调整
+- `refactor`: 代码重构
+- `docs`: 文档修改
+
+### 查看提交历史
+
+```bash
+git log --oneline --graph --decorate
+```
+
+### 项目开发提交记录
+
+```
+init: 创建Vue 3 + Vite项目基础架构
+feat: 配置Vue Router实现页面路由功能
+feat: 实现localStorage本地数据存储工具
+feat: 开发任务卡片组件TaskCard
+feat: 开发任务表单组件TaskForm
+feat: 开发任务筛选组件TaskFilter
+feat: 开发统计面板组件StatPanel
+feat: 开发首页仪表盘DashboardView
+feat: 开发任务列表页TaskListView
+feat: 开发任务编辑页TaskEditView
+feat: 开发统计分析页StatsView
+feat: 开发设置页SettingsView
+feat: 开发Toast提示组件
+style: 优化任务卡片样式和状态标识
+style: 实现响应式布局适配移动端
+feat: 实现任务搜索和筛选功能
+feat: 实现任务排序功能
+feat: 实现数据统计和图表展示
+feat: 实现数据导入导出功能
+docs: 完善README文件添加使用说明
+```
+
 ## 许可证
 
 MIT License

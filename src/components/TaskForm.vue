@@ -139,8 +139,13 @@ export default {
     }
 
     const handleSubmit = () => {
-      if (!validate()) return
-      
+      console.log('TaskForm handleSubmit called')
+      console.log('Form data:', form)
+      if (!validate()) {
+        console.log('Validation failed:', errors)
+        return
+      }
+      console.log('Validation passed, emitting submit')
       emit('submit', {
         title: form.title.trim(),
         description: form.description.trim(),
@@ -167,21 +172,33 @@ export default {
 <style scoped>
 .task-form-container {
   background: white;
-  border-radius: 8px;
-  padding: 1.5rem;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  border-radius: 20px;
+  padding: 2rem;
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
 }
 
 .task-form-container h2 {
-  margin-bottom: 1.5rem;
-  color: #333;
-  font-size: 1.3rem;
+  margin-bottom: 2rem;
+  color: #1f2937;
+  font-size: 1.5rem;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.task-form-container h2::before {
+  content: '';
+  width: 4px;
+  height: 24px;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  border-radius: 2px;
 }
 
 .task-form {
   display: flex;
   flex-direction: column;
-  gap: 1rem;
+  gap: 1.5rem;
 }
 
 .form-group {
@@ -190,81 +207,142 @@ export default {
 }
 
 .form-group label {
-  margin-bottom: 0.5rem;
-  font-weight: 500;
-  color: #555;
+  margin-bottom: 0.625rem;
+  font-weight: 600;
+  color: #374151;
+  font-size: 0.9rem;
 }
 
 .form-input,
 .form-textarea,
 .form-select {
-  padding: 0.75rem;
-  border: 1px solid #ddd;
-  border-radius: 6px;
+  padding: 0.875rem 1rem;
+  border: 2px solid var(--border-color);
+  border-radius: 12px;
   font-size: 1rem;
-  transition: border-color 0.2s;
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  background: var(--bg-color);
+  color: var(--text-primary);
 }
 
 .form-input:focus,
 .form-textarea:focus,
 .form-select:focus {
   outline: none;
-  border-color: #4a6cf7;
+  border-color: var(--primary-color);
+  background: var(--card-bg);
+  box-shadow: 0 0 0 3px rgba(14, 165, 233, 0.1);
+  transform: translateY(-1px);
 }
 
 .form-textarea {
   resize: vertical;
+  min-height: 100px;
 }
 
 .form-row {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 1rem;
+  gap: 1.5rem;
 }
 
 .error {
   color: #ef4444;
   font-size: 0.8rem;
-  margin-top: 0.25rem;
+  margin-top: 0.375rem;
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  animation: shake 0.3s ease-in-out;
+}
+
+@keyframes shake {
+  0%, 100% { transform: translateX(0); }
+  25% { transform: translateX(-4px); }
+  75% { transform: translateX(4px); }
 }
 
 .form-actions {
   display: flex;
   gap: 1rem;
   justify-content: flex-end;
-  margin-top: 1rem;
+  margin-top: 1.5rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid #f3f4f6;
 }
 
 .btn {
-  padding: 0.75rem 1.5rem;
+  padding: 0.875rem 2rem;
   border: none;
-  border-radius: 6px;
-  font-size: 1rem;
+  border-radius: 12px;
+  font-size: 0.95rem;
+  font-weight: 600;
   cursor: pointer;
-  transition: background-color 0.2s;
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
 }
 
 .btn-primary {
-  background-color: #4a6cf7;
+  background: var(--primary-gradient);
   color: white;
+  box-shadow: 0 4px 6px -1px rgba(14, 165, 233, 0.3);
+  pointer-events: auto;
+  cursor: pointer;
 }
 
 .btn-primary:hover {
-  background-color: #3b5bdb;
+  transform: translateY(-2px);
+  box-shadow: 0 8px 12px -2px rgba(14, 165, 233, 0.4);
+}
+
+.btn-primary:active {
+  transform: scale(0.98);
 }
 
 .btn-secondary {
-  background-color: #e5e7eb;
-  color: #374151;
+  background: var(--bg-color);
+  color: var(--text-secondary);
+  border: 2px solid var(--border-color);
 }
 
 .btn-secondary:hover {
-  background-color: #d1d5db;
+  background: var(--border-color);
+  border-color: var(--text-secondary);
+  transform: translateY(-1px);
 }
 
 @media (max-width: 640px) {
+  .task-form-container {
+    padding: 1.5rem;
+    border-radius: 16px;
+  }
+  
+  .task-form-container h2 {
+    font-size: 1.25rem;
+    margin-bottom: 1.5rem;
+  }
+  
   .form-row {
     grid-template-columns: 1fr;
+    gap: 1rem;
+  }
+  
+  .form-input,
+  .form-textarea,
+  .form-select {
+    padding: 0.75rem;
+  }
+  
+  .form-actions {
+    flex-direction: column;
+  }
+  
+  .btn {
+    width: 100%;
+    padding: 0.875rem 1.5rem;
   }
 }
 </style>

@@ -1,6 +1,6 @@
 <template>
   <div class="dashboard">
-    <div class="page-header">
+    <div class="page-header" :style="headerStyle">
       <h1>欢迎回来</h1>
       <p>{{ greeting }}，今天是 {{ todayStr }}</p>
     </div>
@@ -50,9 +50,10 @@
 </template>
 
 <script>
-import { ref, computed, onMounted } from 'vue'
+import { ref, computed, onMounted, onUnmounted } from 'vue'
 import { storage } from '../utils/storage'
 import { toast } from '../utils/toast'
+import { getCurrentTheme, themes } from '../utils/theme'
 import StatPanel from '../components/StatPanel.vue'
 import TaskCard from '../components/TaskCard.vue'
 
@@ -61,12 +62,59 @@ export default {
   components: { StatPanel, TaskCard },
   setup() {
     const tasks = ref([])
+    const currentTheme = ref(getCurrentTheme())
 
     const loadTasks = () => {
-      tasks.value = storage.getAllTasks()
+      const newTasks = storage.getAllTasks()
+      tasks.value = []
+      tasks.value.push(...newTasks)
     }
 
-    onMounted(loadTasks)
+    const loadTheme = () => {
+      currentTheme.value = getCurrentTheme()
+    }
+
+    const headerStyle = computed(() => {
+      try {
+        const theme = themes[currentTheme.value]
+        if (!theme) {
+          console.warn('Theme not found:', currentTheme.value)
+          return {
+            background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+            transition: 'background 0.5s ease-in-out'
+          }
+        }
+        return {
+          background: theme.primaryGradient,
+          boxShadow: `0 20px 25px -5px ${theme.primaryColor}33`,
+          transition: 'background 0.5s ease-in-out, box-shadow 0.5s ease-in-out'
+        }
+      } catch (error) {
+        console.error('Error loading theme style:', error)
+        return {
+          background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+          transition: 'background 0.5s ease-in-out'
+        }
+      }
+    })
+
+    onMounted(() => {
+      loadTasks()
+      loadTheme()
+    })
+
+    // 监听主题变更事件
+    const handleThemeChange = () => {
+      loadTheme()
+    }
+
+    // 使用window事件来监听主题变更
+    const themeChangeListener = () => {
+      loadTheme()
+    }
+
+    // 挂载时添加监听器
+    window.addEventListener('themeChanged', themeChangeListener)
 
     const greeting = computed(() => {
       const hour = new Date().getHours()
@@ -140,6 +188,11 @@ export default {
       toast.success(`任务状态已更新为「${nextStatus}」`)
     }
 
+    // 卸载时移除监听器
+    onUnmounted(() => {
+      window.removeEventListener('themeChanged', themeChangeListener)
+    })
+
     return {
       tasks,
       greeting,
@@ -149,7 +202,8 @@ export default {
       inProgressTasks,
       editTask,
       confirmDelete,
-      changeStatus
+      changeStatus,
+      headerStyle
     }
   }
 }
@@ -161,97 +215,154 @@ export default {
 }
 
 .page-header {
-  margin-bottom: 2rem;
+  margin-bottom: 2.5rem;
+  padding: 2rem;
+  border-radius: 20px;
 }
 
 .page-header h1 {
-  font-size: 2rem;
-  color: #333;
+  font-size: 2.25rem;
+  color: white;
   margin-bottom: 0.5rem;
+  font-weight: 700;
 }
 
 .page-header p {
-  color: #666;
-  font-size: 1.1rem;
+  color: rgba(255, 255, 255, 0.85);
+  font-size: 1.15rem;
 }
 
 .section {
-  margin-bottom: 2rem;
+  margin-bottom: 2.5rem;
 }
 
 .section-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 1rem;
+  margin-bottom: 1.25rem;
 }
 
 .section h2 {
-  font-size: 1.3rem;
-  color: #333;
+  font-size: 1.4rem;
+  color: #1f2937;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.section h2::before {
+  content: '';
+  width: 3px;
+  height: 20px;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  border-radius: 2px;
 }
 
 .view-all {
-  color: #4a6cf7;
+  color: #667eea;
   text-decoration: none;
   font-size: 0.9rem;
-  font-weight: 500;
+  font-weight: 600;
+  padding: 0.5rem 1rem;
+  border-radius: 8px;
+  transition: all 0.2s ease;
 }
 
 .view-all:hover {
-  text-decoration: underline;
+  background: rgba(102, 126, 234, 0.1);
+  text-decoration: none;
 }
 
 .task-list {
   display: grid;
-  gap: 1rem;
+  gap: 1.25rem;
 }
 
 .empty-state {
   background: white;
-  border-radius: 8px;
-  padding: 3rem;
+  border-radius: 16px;
+  padding: 4rem 2rem;
   text-align: center;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+  border: 2px dashed #e5e7eb;
 }
 
 .empty-icon {
-  font-size: 3rem;
+  font-size: 4rem;
   display: block;
-  margin-bottom: 1rem;
+  margin-bottom: 1.25rem;
+  animation: bounce 2s ease-in-out infinite;
+}
+
+@keyframes bounce {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-10px); }
 }
 
 .empty-state p {
-  color: #666;
-  margin-bottom: 1rem;
+  color: #6b7280;
+  margin-bottom: 1.5rem;
+  font-size: 1rem;
 }
 
 .btn {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  padding: 0.75rem 1.5rem;
-  border-radius: 6px;
+  padding: 0.875rem 1.75rem;
+  border-radius: 12px;
   text-decoration: none;
-  font-weight: 500;
+  font-weight: 600;
+  font-size: 0.95rem;
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  cursor: pointer;
+  pointer-events: auto;
+  position: relative;
+  z-index: 1;
 }
 
 .btn-primary {
-  background-color: #4a6cf7;
+  background: var(--primary-gradient);
   color: white;
+  box-shadow: 0 4px 6px -1px rgba(14, 165, 233, 0.3);
+  border: none;
 }
 
 .btn-primary:hover {
-  background-color: #3b5bdb;
+  transform: translateY(-2px);
+  box-shadow: 0 8px 12px -2px rgba(14, 165, 233, 0.4);
+}
+
+.btn-primary:active {
+  transform: scale(0.98);
 }
 
 @media (max-width: 640px) {
+  .page-header {
+    padding: 1.5rem;
+    border-radius: 16px;
+  }
+  
   .page-header h1 {
     font-size: 1.5rem;
   }
   
+  .page-header p {
+    font-size: 1rem;
+  }
+  
   .empty-state {
-    padding: 2rem;
+    padding: 2.5rem 1.5rem;
+  }
+  
+  .empty-icon {
+    font-size: 3rem;
+  }
+  
+  .section h2 {
+    font-size: 1.25rem;
   }
 }
 </style>
